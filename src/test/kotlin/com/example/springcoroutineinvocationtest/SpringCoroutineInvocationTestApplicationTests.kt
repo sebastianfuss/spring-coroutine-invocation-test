@@ -9,11 +9,10 @@ import org.springframework.stereotype.Repository
 @SpringBootTest
 class SpringCoroutineInvocationTestApplicationTests(
     @Autowired private val testRepository: TestRepository,
-    @Autowired private val testService: TestService,
 ) {
     @Test
     fun testSuspendFunctionAsMethodParam() = runBlocking {
-        testService.update("4711") {
+        testRepository.update("4711") {
             it
         }
     }
@@ -25,17 +24,14 @@ class SpringCoroutineInvocationTestApplicationTests(
 }
 
 @Repository
-class TestRepository : AbstractTestRepository<String>()
+class TestRepository : AbstractTestRepository<String> (){
+    suspend fun update(id: String, action: suspend (String) -> String) {
+        println("update [$id]: ${action("input")}")
+    }
+}
 
 abstract class AbstractTestRepository<T> {
     open suspend fun save(entity: T) {
         println("save: $entity")
-    }
-}
-
-@Repository
-class TestService {
-    suspend fun update(id: String, action: suspend (String) -> String) {
-        println("update [$id]: ${action("input")}")
     }
 }
